@@ -8,12 +8,17 @@ public class IfStmt implements Stmt {
     private final Block elseBlock; // optional
 
 	public IfStmt(Exp exp, Block thenBlock, Block elseBlock) {
-	    // completare
+	    this.exp = requireNonNull(exp);
+	    this.thenBlock = requireNonNull(thenBlock);
+	    this.elseBlock = elseBlock;
 	}
 
 	public IfStmt(Exp exp, Block thenBlock) {
-	    // completare
+		this.exp = requireNonNull(exp);
+		this.thenBlock = requireNonNull(thenBlock);
+		this.elseBlock = null;
 	}
+
 
 	@Override
 	public String toString() {
