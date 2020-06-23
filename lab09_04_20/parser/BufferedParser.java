@@ -93,7 +93,13 @@ public class BufferedParser implements Parser {
 	// parses a non empty sequence of statements, MoreStmt binary operator is right
 	// associative
 	private StmtSeq parseStmtSeq() throws ParserException {
-	    // completare
+		var stmt = parseStmt();
+		if (buf_tokenizer.tokenType() == STMT_SEP){
+			nextToken();
+			return new MoreStmt(stmt, parseStmtSeq());
+		}
+		return new SingleStmt(stmt);
+
 	}
 
 	// parses statements
@@ -114,27 +120,47 @@ public class BufferedParser implements Parser {
 
 	// parses the 'print' statement
 	private PrintStmt parsePrintStmt() throws ParserException {
-	    // completare
+		nextToken();
+		return new PrintStmt(parseExp());
 	}
 
 	// parses the 'var' statement
 	private VarStmt parseVarStmt() throws ParserException {
-	    // completare
+	    nextToken();
+	    VarIdent ident = parseVarIdent();
+	    consume(ASSIGN);
+	    return new VarStmt(ident,parseExp());
 	}
 
 	// parses the assignment statement
 	private AssignStmt parseAssignStmt() throws ParserException {
-	    // completare
+	    Ident ident = parseVarIdent();
+	    consume(ASSIGN);
+	    return new AssignStmt(ident, parseExp());
 	}
 
 	// parses the if_else statement
 	private IfStmt parseIfStmt() throws ParserException {
-	    // completare
+	    nextToken();
+	    match(OPEN_PAR);
+	    Exp exp = parseRoundPar();
+	    match(OPEN_BLOCK);
+	    Block thenBlock = parseBlock();
+	    if (buf_tokenizer.tokenType() == ELSE){
+	    	nextToken();
+	    	match(OPEN_BLOCK);
+	    	return new IfStmt(exp, thenBlock, parseBlock());
+		}
+	    return new IfStmt(exp, thenBlock);
+
 	}
 
 	// parses a block statement
 	private Block parseBlock() throws ParserException {
-	    // completare
+	    nextToken();
+	    Block block = new Block(parseStmtSeq());
+	    consume(CLOSE_BLOCK);
+	    return block;
 	}
 
 	/*
@@ -142,7 +168,12 @@ public class BufferedParser implements Parser {
 	 * left-associative
 	 */
 	private Exp parseExp() throws ParserException {
-	    // completare
+	    Exp exp = parseEq();
+	    while (buf_tokenizer.tokenType() == AND){
+	    	nextToken();
+	    	exp = new And(exp, parseEq() );
+		}
+	    return exp;
 	}
 
 	/*
@@ -150,7 +181,12 @@ public class BufferedParser implements Parser {
 	 * left-associative
 	 */
 	private Exp parseEq() throws ParserException {
-	    // completare
+	    Exp exp = parseAdd();
+	    while (buf_tokenizer.tokenType() == EQ){
+	    	nextToken();
+	    	exp = new Eq (exp, parseAdd());
+		}
+	    return exp;
 	}
 
 	/*
@@ -158,7 +194,12 @@ public class BufferedParser implements Parser {
 	 * is left-associative
 	 */
 	private Exp parseAdd() throws ParserException {
-	    // completare
+	    Exp exp = parseMul();
+	    while (buf_tokenizer.tokenType() == PLUS){
+	    	nextToken();
+	    	exp = new Add (exp, parseMul());
+		}
+	    return exp;
 	}
 
 	/*
@@ -166,7 +207,12 @@ public class BufferedParser implements Parser {
 	 * is left-associative
 	 */
 	private Exp parseMul() throws ParserException {
-	    // completare
+		var exp = parseAtom();
+		while (buf_tokenizer.tokenType() == TIMES){
+			nextToken();
+			exp = new Mul (exp, parseAtom());
+		}
+		return exp;
 	}
 
 	// parses expressions of type Atom
@@ -197,47 +243,68 @@ public class BufferedParser implements Parser {
 
 	// parses natural literals
 	private IntLiteral parseNum() throws ParserException {
-	    // completare
+		match(NUM);
+	    var intLiteral = new IntLiteral(buf_tokenizer.intValue());
+	    nextToken();
+	    return intLiteral;
 	}
 
 	// parses boolean literals
 	private BoolLiteral parseBoolean() throws ParserException {
-	    // completare
+		match(BOOL);
+		var boolLiteral = new BoolLiteral(buf_tokenizer.boolValue());
+		nextToken();
+		return boolLiteral;
 	}
 
 	// parses variable identifiers
 	private VarIdent parseVarIdent() throws ParserException {
-	    // completare
+		match(IDENT);
+		var varIdent = new VarIdent(buf_tokenizer.tokenString());
+		nextToken();
+		return varIdent;
 	}
 
 	// parses MINUS Atom
 	private Sign parseMinus() throws ParserException {
-	    // completare
+		nextToken();
+	    return new Sign(parseAtom());
 	}
 
 	// parses FST Atom
 	private Fst parseFst() throws ParserException {
-	    // completare
+		nextToken();
+		return new Fst(parseAtom());
 	}
 
 	// parses SND Atom
 	private Snd parseSnd() throws ParserException {
-	    // completare
+		nextToken();
+		return new Snd(parseAtom());
 	}
 
 	// parses NOT Atom
 	private Not parseNot() throws ParserException {
-	    // completare
+		nextToken();
+		return new Not(parseAtom());
 	}
 
 	// parses pairs
 	private PairLit parsePairLit() throws ParserException {
-	    // completare
+	    nextToken();
+	    Exp left = parseExp();
+	    consume(EXP_SEP);
+		Exp right = parseExp();
+	    consume(END_PAIR);
+	    return new PairLit(left, right);
 	}
 
 	// parses OPEN_PAR Exp CLOSE_PAR
 	private Exp parseRoundPar() throws ParserException {
-	    // completare
+	    nextToken();
+	    var exp = parseExp();
+	    consume(CLOSE_PAR);
+	    return exp;
 	}
 
 	private static BufferedReader tryOpenInput(String inputPath) throws FileNotFoundException {
