@@ -58,6 +58,8 @@ public class BufferedTokenizer implements Tokenizer {
 		keywords.put("else", ELSE);
 		keywords.put("fst", FST);
 		keywords.put("snd", SND);
+		keywords.put("for", FOR);
+		keywords.put("to", TO);
 	}
 
 	static { // static initializer to define the table of symbols

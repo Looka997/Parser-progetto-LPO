@@ -116,6 +116,8 @@ public class BufferedParser implements Parser {
 			return parseAssignStmt();
 		case IF:
 			return parseIfStmt();
+		case FOR:
+			return parseForStmt();
 		}
 	}
 
@@ -156,9 +158,19 @@ public class BufferedParser implements Parser {
 
 	}
 
+	// parses the for_to statement
+	private ForStmt parseForStmt() throws ParserException{
+		nextToken();	// FOR already recognized;
+		Ident ident = parseVarIdent();
+		consume(TO);
+		Exp exp = parseExp();
+		match(OPEN_BLOCK);
+		return new ForStmt(ident, exp, parseBlock());
+	}
+
 	// parses a block statement
 	private Block parseBlock() throws ParserException {
-	    nextToken();
+	    nextToken();	// OPEN_BLOCK already recognized;
 	    Block block = new Block(parseStmtSeq());
 	    consume(CLOSE_BLOCK);
 	    return block;
