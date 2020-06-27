@@ -1,5 +1,7 @@
 package lab09_04_20.parser;
 
+import lab09_04_20.parser.ast.Season;
+
 import java.io.IOException;
 
 public interface Tokenizer extends AutoCloseable {
@@ -13,6 +15,8 @@ public interface Tokenizer extends AutoCloseable {
 	int intValue();
 
 	boolean boolValue();
+
+	Season seasonValue();
 
 	public void close() throws IOException;
 

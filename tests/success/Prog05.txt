@@ -1,0 +1,5 @@
+// ProgClass(MoreStmt(PrintStmt(Eq(SeasonOf(SeasonLiteral(WINTER)),SeasonLiteral(WINTER))),MoreStmt(PrintStmt(Eq(NumberOf(SeasonLiteral(SPRING)),IntLiteral(1))),MoreStmt(PrintStmt(Eq(NumberOf(SeasonLiteral(SUMMER)),IntLiteral(2))),SingleStmt(PrintStmt(Eq(NumberOf(SeasonLiteral(FALL)),IntLiteral(3))))))))
+print seasonof Winter==Winter; // stampa true
+print #Spring==1; // stampa true
+print #Summer==2; // stampa true
+print #Fall==3 // stampa true

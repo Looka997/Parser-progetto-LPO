@@ -16,11 +16,12 @@ import lab09_04_20.parser.ast.*;
 Prog ::= StmtSeq EOF
 StmtSeq ::= Stmt (';' StmtSeq)?
 Stmt ::= 'var'? IDENT '=' Exp | 'print' Exp |  'if' '(' Exp ')' '{' StmtSeq '}' ('else' '{' StmtSeq '}')? | 'for' IDENT 'to' Exp '{' StmtSeq '}'
-Exp ::= Eq ('&&' Eq)* | Exp '<' Exp | '#' Exp | 'seasonof' Exp
-Eq ::= Add ('==' Add)*
+Exp ::= Eq ('&&' Eq)*
+Eq ::= LessThan ('==' LessThan)*
+LessThan ::= Add ('<' Add)*
 Add ::= Mul ('+' Mul)*
 Mul::= Atom ('*' Atom)*
-Atom ::= '<<' Exp ',' Exp '>>' | 'fst' Atom | 'snd' Atom | '-' Atom | '!' Atom | BOOL | NUM | IDENT | SEASON | '(' Exp ')'
+Atom ::= '<<' Exp ',' Exp '>>' | 'fst' Atom | 'snd' Atom | '-' Atom | '!' Atom |'#' Atom | 'seasonof' Atom | BOOL | NUM | IDENT | SEASON | '(' Exp ')'
 */
 
 public class BufferedParser implements Parser {
@@ -181,12 +182,26 @@ public class BufferedParser implements Parser {
 	 * left-associative
 	 */
 	private Exp parseEq() throws ParserException {
-	    Exp exp = parseAdd();
+	    Exp exp = parseLessThan();
 	    while (buf_tokenizer.tokenType() == EQ){
 	    	nextToken();
-	    	exp = new Eq (exp, parseAdd());
+	    	exp = new Eq (exp, parseLessThan());
 		}
 	    return exp;
+	}
+
+	/*
+	 * parses expressions, starting from the lowest precedence operator LESS which is
+	 * left-associative
+	 */
+
+	private Exp parseLessThan() throws ParserException {
+		Exp exp = parseAdd();
+		while (buf_tokenizer.tokenType() == LESS){
+			nextToken();
+			exp = new LessThan (exp, parseAdd());
+		}
+		return exp;
 	}
 
 	/*
@@ -238,6 +253,12 @@ public class BufferedParser implements Parser {
 			return parseFst();
 		case SND:
 			return parseSnd();
+		case SEASON:
+			return parseSeason();
+		case SEASON_OF:
+			return parseSeasonOf();
+		case NUM_OF:
+			return parseNumberOf();
 		}
 	}
 
@@ -255,6 +276,14 @@ public class BufferedParser implements Parser {
 		var boolLiteral = new BoolLiteral(buf_tokenizer.boolValue());
 		nextToken();
 		return boolLiteral;
+	}
+
+	// parses season literals
+	private SeasonLiteral parseSeason() throws ParserException{
+		match(SEASON);
+		var seasonLiteral = new SeasonLiteral(buf_tokenizer.seasonValue());
+		nextToken();
+		return seasonLiteral;
 	}
 
 	// parses variable identifiers
@@ -305,6 +334,18 @@ public class BufferedParser implements Parser {
 	    var exp = parseExp();
 	    consume(CLOSE_PAR);
 	    return exp;
+	}
+
+	// parses SEASON_OF Atom
+	private SeasonOf parseSeasonOf() throws ParserException{
+		nextToken();	// recognized SEASON_OF
+		return new SeasonOf(parseAtom());
+	}
+
+	// parses NUM_OF	Atom
+	private NumberOf parseNumberOf() throws ParserException{
+		nextToken();	// recognized NUM_OF
+		return new NumberOf(parseAtom());
 	}
 
 	private static BufferedReader tryOpenInput(String inputPath) throws FileNotFoundException {

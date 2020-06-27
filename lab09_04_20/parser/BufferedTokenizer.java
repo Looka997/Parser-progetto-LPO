@@ -1,5 +1,7 @@
 package lab09_04_20.parser;
 
+import lab09_04_20.parser.ast.Season;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
@@ -23,6 +25,7 @@ public class BufferedTokenizer implements Tokenizer {
 	private String tokenString; // the lexeme of the currently recognized token
 	private int intValue; // the integer value if the currently recognized token has type NUM
 	private boolean boolValue; // the boolean value if the currently recognized token has type BOOL
+	private Season seasonValue; // the season value if the currently recognized token has type SEASON
 
 	static { // static initializer to define the regular expression of all valid lexemes
 		// remark: groups must correspond to the ordinal of the corresponding
@@ -30,7 +33,7 @@ public class BufferedTokenizer implements Tokenizer {
 		final var skipRegEx = "(\\s+|//.*)"; // group 1: white spaces or single line comments to be skipped
 		final var identRegEx = "([a-zA-Z]\\w*)"; // group 2: identifiers
 		final var numRegEx = "(0|[1-9][0-9]*)"; // group 3: radix 10 natural numbers
-		final var symbolRegEx = "\\+|\\*|==|=|<<|>>|\\(|\\)|;|,|\\{|\\}|-|!|&&"; /*
+		final var symbolRegEx = "\\+|\\*|==|=|<<|>>|\\(|\\)|;|,|\\{|\\}|-|!|&&|#|<"; /*
 																					 * symbols are singleton lexical
 																					 * categories
 																					 */
@@ -46,6 +49,11 @@ public class BufferedTokenizer implements Tokenizer {
 		keywords.put("var", VAR);
 		keywords.put("false", BOOL);
 		keywords.put("true", BOOL);
+		keywords.put("Winter", SEASON);
+		keywords.put("Spring", SEASON);
+		keywords.put("Summer", SEASON);
+		keywords.put("Fall", SEASON);
+		keywords.put("seasonof", SEASON_OF);
 		keywords.put("if", IF);
 		keywords.put("else", ELSE);
 		keywords.put("fst", FST);
@@ -68,6 +76,8 @@ public class BufferedTokenizer implements Tokenizer {
 		symbols.put("!", NOT);
 		symbols.put("&&", AND);
 		symbols.put("==", EQ);
+		symbols.put("<", LESS);
+		symbols.put ("#", NUM_OF);
 	}
 
 	public BufferedTokenizer(BufferedReader br) {
@@ -93,7 +103,7 @@ public class BufferedTokenizer implements Tokenizer {
 	}
 
 	private TokenType assignTokenType() { // pre-condition: matcher.lookingAt() returned true
-		if (matcher.group(IDENT.ordinal()) != null) // IDENT or BOOL or a keyword
+		if (matcher.group(IDENT.ordinal()) != null) // IDENT or BOOL or SEASON or a keyword
 			return requireNonNullElse(keywords.get(tokenString), IDENT);
 		if (matcher.group(NUM.ordinal()) != null)
 			return NUM;
@@ -118,6 +128,8 @@ public class BufferedTokenizer implements Tokenizer {
 		case BOOL:
 			boolValue = Boolean.parseBoolean(tokenString);
 			break;
+		case SEASON:
+			seasonValue = Season.parseSeason(tokenString);
 		default: // no other annotations required
 			break;
 		}
@@ -169,6 +181,12 @@ public class BufferedTokenizer implements Tokenizer {
 	public int intValue() { // integer value of the most recently recognized token, if of type NUM
 		checkLegalState(NUM);
 		return intValue;
+	}
+
+	@Override
+	public Season seasonValue(){ // season value of the most recently recognized token, if of type SEASON
+		checkLegalState(SEASON);
+		return seasonValue;
 	}
 
 	@Override
