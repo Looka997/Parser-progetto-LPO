@@ -1,0 +1,2 @@
+Repository per modificare il parser in modo che sia pronto per le specifiche del progetto
+In particolare, bisogna aggiungere il tipo Season, l'operatore binario <, gli operatori unari # e seasonof ed il construtto for ... to 
