@@ -15,12 +15,12 @@ import lab09_04_20.parser.ast.*;
 /*
 Prog ::= StmtSeq EOF
 StmtSeq ::= Stmt (';' StmtSeq)?
-Stmt ::= 'var'? IDENT '=' Exp | 'print' Exp |  'if' '(' Exp ')' '{' StmtSeq '}' ('else' '{' StmtSeq '}')? 
-Exp ::= Eq ('&&' Eq)* 
+Stmt ::= 'var'? IDENT '=' Exp | 'print' Exp |  'if' '(' Exp ')' '{' StmtSeq '}' ('else' '{' StmtSeq '}')? | 'for' IDENT 'to' Exp '{' StmtSeq '}'
+Exp ::= Eq ('&&' Eq)* | Exp '<' Exp | '#' Exp | 'seasonof' Exp
 Eq ::= Add ('==' Add)*
 Add ::= Mul ('+' Mul)*
 Mul::= Atom ('*' Atom)*
-Atom ::= '<<' Exp ',' Exp '>>' | 'fst' Atom | 'snd' Atom | '-' Atom | '!' Atom | BOOL | NUM | IDENT | '(' Exp ')'
+Atom ::= '<<' Exp ',' Exp '>>' | 'fst' Atom | 'snd' Atom | '-' Atom | '!' Atom | BOOL | NUM | IDENT | SEASON | '(' Exp ')'
 */
 
 public class BufferedParser implements Parser {
